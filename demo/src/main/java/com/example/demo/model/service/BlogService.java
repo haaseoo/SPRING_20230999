@@ -1,6 +1,8 @@
 package com.example.demo.model.service;
 
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.demo.model.domain.Article;
@@ -23,5 +25,22 @@ public class BlogService {
     public Article save(AddArticleRequest request) {
       // dto가 없을 경우 직접 이 공간에 구현 가능
         return blogRepository.save(request.toEntity());
+    }
+
+    public Optional<Article> findById(Long id) {
+      return blogRepository.findById(id);
+    }
+
+    public void update(Long id, AddArticleRequest request) {
+      Optional<Article> optionalArticle = blogRepository.findById(id); // 단일 글 조회
+      optionalArticle.ifPresent(article -> { // 값이 있으면
+        article.update(request.getTitle(), request.getContent()); // 값을 수정
+        blogRepository.save(article); // Article 객체에 저장
+      });
+    }
+
+    // 삭제 기능
+    public void delete(Long id) {
+      blogRepository.deleteById(id);
     }
 }
