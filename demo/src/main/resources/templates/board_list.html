@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title>블로그 게시판</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="mt-5">블로그 게시판 (new)</h1>
+      <!-- 게시글 검색창-->
+      <form th:action="@{/board_list}" method="get" class="mt-4">
+        <div class="input-group">
+          <input
+            type="text"
+            name="keyword"
+            th:value="${keyword}"
+            class="form-control"
+            placeholder="검색어 입력..."
+          />
+          <button type="submit" class="btn btn-primary">검색</button>
+        </div>
+      </form>
+
+      <br />
+      <table class="table table-botdered">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>제목</th>
+            <th>조회수</th>
+            <th>작성일</th>
+            <th>좋아요</th>
+            <th>작성자</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="board : ${boards}">
+            <td th:text="${board.id}"></td>
+            <td>
+              <a th:href="@{/board_view/{id}(id=${board.id})}">
+                <span th:text="${board.title}"></span>
+              </a>
+            </td>
+            <td th:text="${board.count}"></td>
+            <td th:text="${board.newdate}"></td>
+            <td th:text="${board.likec}"></td>
+            <td th:text="${board.user}"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>
