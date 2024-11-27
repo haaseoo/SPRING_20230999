@@ -131,7 +131,7 @@
     $('.btn-primary').on('click', function (event) {
       if (confirmClose()) {
         window.close(); // 창 닫기
-        window.location.href = '/index'; // 이동할 페이지의 URL
+        window.location.href = '/'; // 이동할 페이지의 URL
       } else {
         event.preventDefault(); // 사용자가 취소하면 링크 이동 방지
       }

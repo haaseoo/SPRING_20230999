@@ -25,4 +25,10 @@ public class DemoController {
     model.addAttribute("data5", "😊"); // model 설정
     return "hello2"; // hello.html 연결
   }
+
+  @GetMapping("/about_detailed") // 전송 방식 GET
+  public String about_detailed(Model model) {
+    return "about_detailed"; // hello.html 연결
+  }
+  
 }
