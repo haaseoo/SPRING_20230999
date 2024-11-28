@@ -44,18 +44,26 @@
               <td th:text="${boards.title}"></td>
               <td th:text="${boards.content}"></td>
               <td>
+                <!-- 수정 -->
                 <a
                   class="btn btn-warning"
                   th:href="@{/board_edit/{id}(id=${board.id})}"
                   >수정</a
                 >
+                <!-- 삭제 -->
                 <form
                   th:action="@{/api/board_delete/{id}(id=${board.id})}"
                   method="post"
                   style="display: inline"
                 >
                   <input type="hidden" name="_method" value="delete" />
-                  <button type="submit" class="btn btn-danger">삭제</button>
+                  <button
+                    type="submit"
+                    class="btn btn-danger"
+                    onclick="return confirm('정말로 삭제하시겠습니까?');"
+                  >
+                    삭제
+                  </button>
                 </form>
               </td>
             </tr>

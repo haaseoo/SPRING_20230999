@@ -78,6 +78,7 @@ public class BlogService {
       });
     }
     
+    // 기본 게시글 목록, 키워드 검색 결과 기능 구현
     public Page<Board> findAll(Pageable pageable) {
       return boardRepository.findAll(pageable);
       }

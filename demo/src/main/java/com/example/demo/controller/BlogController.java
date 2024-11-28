@@ -73,21 +73,34 @@ public class BlogController {
 
     
     // * board *
-    @GetMapping("/board_list") // 새로운 게시판 링크 지정
-    public String board_list(Model model, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "") String keyword) {
-        PageRequest pageable = PageRequest.of(page, 3); // 한 페이지의 게시글 수
-        Page<Board> list; // Page를 반환
-        if (keyword.isEmpty()) {
-            list = blogService.findAll(pageable); // 기본 전체 출력(키워드 x)
-        } else {
-            list = blogService.searchByKeyword(keyword, pageable); // 키워드로 검색
-        }
+    @GetMapping("/board_list") // 새로운 게시판 링크지정
+    public String boardList(
+            Model model,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "") String keyword) {
+        int pageSize = 3; // 한 페이지의 게시글 수
 
-        model.addAttribute("boards", list); // 모델에 추가
-        model.addAttribute("totalPages", list.getTotalPages()); // 페이지 크기
-        model.addAttribute("currentPage", page); // 페이지 번호
-        model.addAttribute("keyword", keyword); // 키워드
-        return "board_list"; // .HTML 연결
+        PageRequest pageable = PageRequest.of(page, pageSize);
+        Page<Board> list = keyword.isEmpty()
+                ? blogService.findAll(pageable)
+                : blogService.searchByKeyword(keyword, pageable);
+
+        // 시작 번호 계산
+        int startNum = (page * pageSize) + 1;
+        
+        model.addAttribute("boards", list);
+        model.addAttribute("totalPages", list.getTotalPages());
+        model.addAttribute("currentPage", page); // currentPage 추가
+        model.addAttribute("startNum", startNum); // 시작 번호 추가
+        model.addAttribute("keyword", keyword);
+        return "board_list";
+    }
+
+    @GetMapping("/board_list/basic")
+    public String boardListBasic(Model model) {
+        List<Board> list = blogService.findAll();
+        model.addAttribute("boards", list);
+        return "board_list";
     }
     
     @GetMapping("/board_view/{id}") // 게시판 링크 지정
@@ -124,17 +137,17 @@ public class BlogController {
         blogService.save(request); // 새로운 게시글 저장
         return "redirect:/board_list"; // 저장 후 게시판 목록 페이지로 리다이렉트
     }
-    
-    @DeleteMapping("/api/board_delete/{id}")
-    public String deleteBoard(@PathVariable Long id) {
-        blogService.delete(id);
-        return "redirect:/board_list";
-    
-    }
 
     @GetMapping("/board_write")
     public String board_write() {
         return "board_write";
+    }
+
+    // 게시판 삭제
+    @DeleteMapping("/api/board_delete/{id}")
+    public String board_delete(@PathVariable Long id) {
+        blogService.delete(id);
+        return "redirect:/board_list";
     }
 
     // * 문자열 에러 (6주차 추가 구현) *
