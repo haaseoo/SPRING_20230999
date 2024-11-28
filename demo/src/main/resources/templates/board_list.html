@@ -12,7 +12,7 @@
   </head>
   <body>
     <div class="container">
-      <h1 class="mt-5">블로그 게시판 (new)</h1>
+      <h1 class="mt-5">new 블로그 게시판</h1>
       <!-- 게시글 검색창-->
       <form th:action="@{/board_list}" method="get" class="mt-4">
         <div class="input-group">
@@ -28,7 +28,7 @@
       </form>
 
       <br />
-      <table class="table table-botdered">
+      <table class="table table-bordered">
         <thead>
           <tr>
             <th>ID</th>
@@ -51,6 +51,20 @@
             <td th:text="${board.newdate}"></td>
             <td th:text="${board.likec}"></td>
             <td th:text="${board.user}"></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 글쓰기 페이지-->
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <!-- 글쓰기 버튼-->
+              <a class="btn btn-outline-primary" th:href="@{/board_write}"
+                >글쓰기</a
+              >
+            </td>
           </tr>
         </tbody>
       </table>

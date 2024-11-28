@@ -3,12 +3,16 @@ package com.example.demo.model.service;
 import java.util.List;
 import java.util.Optional;
 
-// import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 // import com.example.demo.model.domain.Article;
-// import com.example.demo.model.repository.BlogRepository;
+import com.example.demo.model.repository.BlogRepository;
+import com.example.demo.model.domain.Article;
 import com.example.demo.model.domain.Board;
 import com.example.demo.model.repository.BoardRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,11 +20,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor // final 필드에 대한 생성자를 자동 생성
 
 public class BlogService {
-    // @Autowired // 객체 주입 자동화
+    @Autowired // 객체 주입 자동화
 
     // * article *
-    // private final BlogRepository blogRepository; // 리포지토리 의존성 주입
-    
+    private final BlogRepository blogRepository; // 리포지토리 의존성 주입
+    private final BoardRepository boardRepository; // Board 관련 리포지토리
+
     // article 게시판 전체 목록 조회
     // public List<Article> findAll() {
     //   return blogRepository.findAll();
@@ -48,9 +53,6 @@ public class BlogService {
       boardRepository.deleteById(id);
     }
 
-    // * board *
-    private final BoardRepository boardRepository;
-
     public List<Board> findAll() { // 게시판 전체 목록 조회
       return boardRepository.findAll();
     }
@@ -58,6 +60,10 @@ public class BlogService {
     public Board save(AddBoardRequest request){
       //DTO가 없는 경우 이곳에 직접 구현 가능
       return boardRepository.save(request.toEntity());
+    }
+
+    public Board save(AddArticleRequest request){
+      return blogRepository.save(request.toEntity());
     }
 
     public Optional<Board> findById(Long id) { // 게시판 특정 글 조회
@@ -71,6 +77,14 @@ public class BlogService {
         boardRepository.save(board); // Board 객체에 저장
       });
     }
-
     
+    public Page<Board> findAll(Pageable pageable) {
+      return boardRepository.findAll(pageable);
+      }
+
+    public Page<Board> searchByKeyword(String keyword, Pageable pageable) {
+      return blogRepository.findByTitleContainingIgnoreCase(keyword, pageable);
+      } // LIKE 검색 제공(대소문자 무시)
+
+
   }
