@@ -106,7 +106,6 @@ public class BlogController {
     @GetMapping("/board_view/{id}") // 게시판 링크 지정
     public String viewBoard(Model model, @PathVariable Long id) {
         Optional<Board> list = blogService.findById(id); // 선택한 게시판 글
-        
         if (list.isPresent()) {
             model.addAttribute("boards", list.get()); // 존재할 경우 실제 Article 객체를 모델에 추가
         } else {
