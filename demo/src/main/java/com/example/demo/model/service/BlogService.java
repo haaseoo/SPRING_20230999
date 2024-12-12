@@ -54,11 +54,6 @@ public class BlogService {
       return boardRepository.findAll();
     }
     
-    public Board save(AddBoardRequest request){
-      //DTO가 없는 경우 이곳에 직접 구현 가능
-      return boardRepository.save(request.toEntity());
-    }
-
     public Board save(AddArticleRequest request){
       return blogRepository.save(request.toEntity());
     }
@@ -67,7 +62,7 @@ public class BlogService {
       return boardRepository.findById(id);
     }
     
-    public void update(Long id, AddBoardRequest request) {
+    public void update(Long id, AddArticleRequest request) {
       Optional<Board> optionalBoard = boardRepository.findById(id); // 단일 글 조회
       optionalBoard.ifPresent(board -> { // 값이 있으면
         board.update(request.getTitle(), request.getContent(), board.getUser(), board.getNewdate(), board.getCount(), board.getLikec());

@@ -23,7 +23,6 @@ import org.springframework.web.filter.HiddenHttpMethodFilter;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.example.demo.model.service.AddArticleRequest;
-import com.example.demo.model.service.AddBoardRequest;
 import com.example.demo.model.service.BlogService;
 
 import jakarta.servlet.http.HttpSession;
@@ -151,13 +150,13 @@ public String boardView(@PathVariable String id, HttpSession session, Model mode
     }
 
     @PutMapping("/api/board_edit/{id}") // 게시글 수정 요청
-    public String updateBoard(@PathVariable Long id, @ModelAttribute AddBoardRequest request) {
+    public String updateBoard(@PathVariable Long id, @ModelAttribute AddArticleRequest request) {
         blogService.update(id, request); // 수정 로직 실행
         return "redirect:/board_list"; // 수정 후 게시판 목록 페이지로 리다이렉트
     }
 
     @PostMapping("/api/boards") // 새로운 게시글 추가 요청
-    public String addBoard(@ModelAttribute AddBoardRequest request) {
+    public String addBoard(@ModelAttribute AddArticleRequest request) {
         blogService.save(request); // 새로운 게시글 저장
         return "redirect:/board_list"; // 저장 후 게시판 목록 페이지로 리다이렉트
     }

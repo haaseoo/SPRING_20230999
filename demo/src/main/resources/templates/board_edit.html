@@ -17,7 +17,7 @@
       <div class="mt-4">
         <h2>게시글 수정을 진행합니다.</h2>
         <form
-          th:action="@{api/board_edit/{id}(id=${board.id})}"
+          th:action="@{/api/board_edit/{id}(id=${board.id})}"
           method="post"
           name="content"
         >
