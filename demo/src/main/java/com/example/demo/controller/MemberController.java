@@ -21,7 +21,7 @@ import java.util.UUID;
 public class MemberController {
 
   private final MemberService memberService;
-  // 생성자 주입을 통한 MemberService 의존성 주입
+  // 생성자 주입을 통한 MemberService 의존성 주입, spring @Autowired 어노테이션을 사용하여 MemberService 빈을 주입받음, 테스트 용이성과 의존성 관리에 유리
   @Autowired
   public MemberController(MemberService memberService) {
       this.memberService = memberService;
@@ -32,7 +32,7 @@ public class MemberController {
     return "join_new"; // .HTML 연결
   }
 
-  // 회원가입 요청 처리
+  // 회원가입 요청 처리, 유효성 검사를 통해 입력 데이터를 검증한 후 회원 저장
   @PostMapping("/api/members")
     public String addMembers(@Valid @ModelAttribute AddMemberRequest request) {
         memberService.saveMember(request); // 요청 데이터를 저장
@@ -40,19 +40,22 @@ public class MemberController {
     }
 
   @GetMapping("/login") // 로그인 페이지 연결
-public String member_login() {
-return "login"; // .HTML 연결
-}
-@PostMapping("/api/login_check")
-public String checkMembers(@ModelAttribute AddMemberRequest request, Model model, HttpServletRequest request2, HttpServletResponse response) {
+    public String member_login() {
+        return "login"; // .HTML 연결
+    }
+
+  @PostMapping("/api/login_check") // 로그인 검증 수행, 세션 관리 및 로그인 성공시 리다이렉트 처리
+    public String checkMembers(@ModelAttribute AddMemberRequest request, Model model, HttpServletRequest request2, HttpServletResponse response) {
     try {
         // 1. 기존 세션이 있으면 무효화
         HttpSession session = request2.getSession(false); // 기존 세션 가져오기 (없으면 null 반환)
         if (session != null) {
             session.invalidate(); // 기존 세션 무효화
+
+            // JSESSIONID 쿠키 초기화 및 삭제
             Cookie cookie = new Cookie("JSESSIONID", null); // JSESSIONID 쿠키 초기화
             cookie.setPath("/"); // 쿠키 경로 설정
-            cookie.setMaxAge(0); // 쿠키 삭제 (만료시간을 0으로 설정)
+            cookie.setMaxAge(0); // 쿠키 삭제 (만료시간 0으로 설정)
             response.addCookie(cookie); // 응답으로 쿠키 전달
         }
 
@@ -97,7 +100,7 @@ public String memberLogout(Model model, HttpServletRequest request, HttpServletR
             session.invalidate(); // 기존 세션 무효화
 
             // JSESSIONID 쿠키 삭제
-            Cookie cookie = new Cookie("JSESSIONID", null);
+            Cookie cookie = new Cookie("JSESSIONID", null); // JSESSIONID 쿠키 생성
             cookie.setPath("/"); // 쿠키 경로 설정
             cookie.setMaxAge(0); // 쿠키 만료 시간 0으로 설정하여 삭제
             response.addCookie(cookie); // 쿠키 응답에 추가
@@ -111,10 +114,10 @@ public String memberLogout(Model model, HttpServletRequest request, HttpServletR
 
         return "login"; // 로그인 페이지로 리다이렉트
     } catch (IllegalArgumentException e) {
-        model.addAttribute("error", e.getMessage()); // 에러 메시지 전달
+        // 로그아웃 실패 시 에러 메시지를 모델에 추가
+        model.addAttribute("error", e.getMessage());
+
         return "login"; // 로그인 실패 시 로그인 페이지로 리다이렉트
     }
 }
-
-
 }

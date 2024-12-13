@@ -77,17 +77,19 @@ public class BlogController {
 
     
     // * board *
+    // 게시판 리스트 페이지 조회
     @GetMapping("/board_list")
     public String boardList(Model model, 
                             @RequestParam(defaultValue = "0") int page, 
                             @RequestParam(defaultValue = "") String keyword, 
                             HttpSession session) {
+
         // 세션에서 사용자 ID 및 이메일 확인
         String userId = (String) session.getAttribute("userId");
         String uEmail = (String) session.getAttribute("email");
         
         if (userId == null || uEmail == null) {
-            return "redirect:/login"; // 로그인되지 않은 사용자 처리
+            return "redirect:/login"; // 로그인되지 않은 사용자는 로그인 페이지로 리다이렉트
         }
     
         int pageSize = 3;  // 한 페이지의 게시글 수
@@ -95,8 +97,8 @@ public class BlogController {
     
         // 키워드 유무에 따라 전체 조회 또는 키워드 검색 수행
         Page<Board> list = keyword.isEmpty()
-                ? blogService.findAll(pageable)
-                : blogService.searchByKeyword(keyword, pageable);
+                ? blogService.findAll(pageable) // 전체 게시글 조회
+                : blogService.searchByKeyword(keyword, pageable);  // 키워드로 게시글 검색
         
         // 시작 번호 계산
         int startNum = (page * pageSize) + 1;
@@ -112,15 +114,17 @@ public class BlogController {
         return "board_list";  // board_list.html 템플릿 반환
     }
 
+    // 게시글 리스트를 기본 방식으로 조회
     @GetMapping("/board_list/basic")
     public String boardListBasic(Model model) {
-        List<Board> list = blogService.findAll();
-        model.addAttribute("boards", list);
+        List<Board> list = blogService.findAll(); // 모든 게시판 게시글 조회
+        model.addAttribute("boards", list); // 모델에 게시글 목록 추가
         return "board_list";
     }
     
+    // 특정 게시글 조회하여 상세 페이지 보여줌
     @GetMapping("/board_view/{id}")
-public String boardView(@PathVariable String id, HttpSession session, Model model) {
+    public String boardView(@PathVariable String id, HttpSession session, Model model) {
     try {
         Long longId = Long.parseLong(id); // 문자열을 Long으로 변환
         Board board = blogService.findById(longId)
@@ -134,35 +138,40 @@ public String boardView(@PathVariable String id, HttpSession session, Model mode
         model.addAttribute("boards", board);
         model.addAttribute("loggedInUser", loggedInUser); // 현재 로그인한 사용자 추가
     } catch (NumberFormatException e) {
-        throw new IllegalArgumentException("ID는 숫자여야 합니다.");
+        throw new IllegalArgumentException("ID는 숫자여야 합니다.");  // ID가 숫자가 아닌 경우 예외 발생
     }
     return "board_view";
 }
     
+    // 특정 게시글을 수정하기 위한 페이지 조회
     @GetMapping("/board_edit/{id}")
     public String editBoard(@PathVariable Long id, Model model) {
-        // 예외 처리: 문자열로 id를 메시지와 함께 전달
+        // 특정 게시글 조회, 존재하지 않을 경우 예외 처리 (문자열로 id를 메시지와 함께 전달)
         Board board = blogService.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다. ID: " + id));
     
-        model.addAttribute("board", board);
+        model.addAttribute("board", board); // 모델에 게시글 추가
         return "board_edit";
     }
 
-    @PutMapping("/api/board_edit/{id}") // 게시글 수정 요청
+    // 특정 게시글 수정
+    @PutMapping("/api/board_edit/{id}") // 게시글 수정 요청 처리
     public String updateBoard(@PathVariable Long id, @ModelAttribute AddArticleRequest request) {
-        blogService.update(id, request); // 수정 로직 실행
+        blogService.update(id, request); // 개시글 수정 로직 실행
         return "redirect:/board_list"; // 수정 후 게시판 목록 페이지로 리다이렉트
     }
 
-    @PostMapping("/api/boards") // 새로운 게시글 추가 요청
+    // 새로운 게시글 추가
+    @PostMapping("/api/boards") // 새로운 게시글 추가 요청 처리
     public String addBoard(@ModelAttribute AddArticleRequest request) {
         blogService.save(request); // 새로운 게시글 저장
         return "redirect:/board_list"; // 저장 후 게시판 목록 페이지로 리다이렉트
     }
 
+    // 게시글 작성 페이지 보여줌
     @GetMapping("/board_write")
-public String boardWrite(HttpSession session, Model model) {
+    public String boardWrite(HttpSession session, Model model) {
+
     // 세션에서 이메일 정보 가져오기
     String email = (String) session.getAttribute("email");
     System.out.println("[DEBUG] 로그인된 사용자 이메일: " + email);
@@ -177,32 +186,33 @@ public String boardWrite(HttpSession session, Model model) {
     return "board_write";
 }
 
-    // 게시판 삭제
+    // 특정 게시글 삭제
     @DeleteMapping("/api/board_delete/{id}")
     public String board_delete(@PathVariable Long id) {
-        blogService.delete(id);
-        return "redirect:/board_list";
+        blogService.delete(id); // 게시글 삭제 로직 실행
+        return "redirect:/board_list"; // 삭제 후 게시판 목록 페이지로 리다이렉트
     }
 
+    // 설정 관련 메서드
     // * 문자열 에러 (6주차 추가 구현) *
+    // HiddenHttpMethodFilter를 빈으로 등록하여 HTML 폼에서 PUT, DELETE 메서드를 사용할 수 있도록 설정
     @Bean
     public HiddenHttpMethodFilter hiddenHttpMethodFilter() {
         return new HiddenHttpMethodFilter();
     }
 
-     // IllegalArgumentException 발생 시 처리
+    // 예외 처리 메서드
+    // IllegalArgumentException 발생 시 처리하는 예외 핸들러
     @ExceptionHandler(IllegalArgumentException.class)
     public String handleIllegalArgumentException(IllegalArgumentException ex, Model model) {
-        model.addAttribute("errorMessage", ex.getMessage());
+        model.addAttribute("errorMessage", ex.getMessage()); // 에러 메시지 추가
         return "error_page/article_error"; // 오류 페이지로 이동
     }
 
-    // MethodArgumentTypeMismatchException 발생 시 처리 (잘못된 타입의 PathVariable 처리)
+    // MethodArgumentTypeMismatchException 발생 시 처리하는 예외 핸들러 (잘못된 타입의 PathVariable 처리)
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public String handleTypeMismatchException(MethodArgumentTypeMismatchException ex, Model model) {
-        model.addAttribute("errorMessage", "잘못된 요청입니다. ID는 숫자여야 합니다.");
+        model.addAttribute("errorMessage", "잘못된 요청입니다. ID는 숫자여야 합니다."); // 에러 메시지 추가
         return "error_page/article_error2"; // 오류 페이지로 이동
     }
-
-    
 }

@@ -9,11 +9,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Getter // 모든 필드에 대한 getter 메서드 생성
+@Setter // 모든 필드에 대한 setter 메서드 생성
+@NoArgsConstructor // 기본 생성자 생성
+@AllArgsConstructor // 모든 필드를 매개변수로 받는 생성자 생성
+@Builder // 빌더 패턴을 적용하여 객체 생성 유연성 제공
 public class AddMemberRequest {
 
     @NotBlank(message = "이름은 공백일 수 없습니다.")
