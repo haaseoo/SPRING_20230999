@@ -12,9 +12,49 @@
   <body>
     <div class="container">
       <div
+        class="mt-4 d-flex align-items-center justify-content-end"
+        style="gap: 20px"
+      >
+        <!-- 날짜 표시 -->
+        <dd class="date fw-bold m-0"></dd>
+
+        <!-- 오늘의 날씨 버튼 -->
+        <button
+          class="button btn btn-sm btn-outline-dark"
+          style="padding: 5px 10px"
+        >
+          오늘의 날씨 보기
+        </button>
+
+        <dl
+          class="d-flex align-items-center justify-content-end gap-3 m-0 text-end"
+        >
+          <!-- 위치 -->
+          <div class="d-flex align-items-center gap-2 mr-2">
+            <dt class="fw-bold m-0">위치 :&nbsp;</dt>
+            <dd class="place m-0"></dd>
+          </div>
+
+          <!-- 날씨 -->
+          <div class="d-flex align-items-center gap-2">
+            <dt class="fw-bold m-0">날씨 :&nbsp;</dt>
+            <dd class="description m-0"></dd>
+          </div>
+        </dl>
+
+        <!-- 날씨 아이콘 -->
+        <img
+          class="icon"
+          src="https://openweathermap.org/img/wn/01d@2x.png"
+          alt="날씨 아이콘"
+          style="width: 40px; height: 40px"
+        />
+      </div>
+
+      <div
         class="d-flex justify-content-between align-items-center mt-4 p-3 border rounded bg-light"
       >
-        <h1 class="m-0">블로그 게시판(new)</h1>
+        <h1 class="m-0">블로그 게시판 (new)</h1>
         <div class="text-right">
           <span
             class="font-weight-bold text-primary"
@@ -33,7 +73,7 @@
             name="keyword"
             th:value="${keyword}"
             class="form-control"
-            placeholder="검색어 입력..."
+            placeholder="검색어를 입력하세요 !"
           />
           <button type="submit" class="btn btn-primary">검색</button>
         </div>
@@ -62,6 +102,8 @@
                 <a
                   th:href="@{/board_view/{id}(id=${board.id})}"
                   th:text="${board.title}"
+                  class="board-title"
+                  onclick="changeColor(this)"
                 ></a>
               </td>
               <td th:text="${board.user}"></td>
@@ -73,13 +115,11 @@
         </table>
         <!-- 글쓰기 버튼 -->
         <table class="table table-bordered">
-          <tbody>
-            <tr>
-              <td>
-                <a class="btn btn-warning" th:href="@{/board_write}">글쓰기</a>
-              </td>
-            </tr>
-          </tbody>
+          <div class="d-flex justify-content-end">
+            <a class="btn btn-outline-secondary" th:href="@{/board_write}"
+              >글쓰기</a
+            >
+          </div>
         </table>
 
         <!-- 페이지 네비게이션 -->
@@ -130,3 +170,98 @@
     </div>
   </body>
 </html>
+
+<script>
+  function changeColor(element) {
+    if (element.classList.contains('clicked')) {
+      element.classList.remove('clicked');
+      localStorage.removeItem('clickedTitle');
+    } else {
+      element.classList.add('clicked');
+      localStorage.setItem('clickedTitle', element.textContent); // 제목을 로컬스토리지에 저장
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // 페이지 로드 시, 로컬스토리지에 저장된 제목이 있으면 색상 변경
+    const clickedTitle = localStorage.getItem('clickedTitle');
+    if (clickedTitle) {
+      const titles = document.querySelectorAll('.board-title');
+      titles.forEach(function (title) {
+        if (title.textContent === clickedTitle) {
+          title.classList.add('clicked');
+        }
+      });
+    }
+  });
+
+  // 날씨 불러오기
+  const button = document.querySelector('.button');
+  const placeSection = document.querySelector('.place');
+  const descSection = document.querySelector('.description');
+  const iconSection = document.querySelector('.icon');
+
+  const API_KEY = 'e01fd34a7db3267553c66774e65c429a';
+
+  button.addEventListener('click', () => {
+    navigator.geolocation.getCurrentPosition(success, fail);
+  });
+
+  const success = (position) => {
+    const latitude = position.coords.latitude;
+    const longitude = position.coords.longitude;
+    console.log(`Latitude: ${latitude}, Longitude: ${longitude}`); // 위치 확인
+    getWeather(latitude, longitude);
+  };
+
+  const fail = () => {
+    alert('좌표를 받아올 수 없음');
+  };
+
+  const getWeather = (lat, lon) => {
+    fetch(
+      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=kr`
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('API 요청 실패');
+        }
+        return response.json();
+      })
+      .then((json) => {
+        console.log(json); // API 응답 데이터 확인
+        const place = json.name; // 도시 이름
+        const description = json.weather[0].description; // 날씨 설명
+        const icon = json.weather[0].icon; // 날씨 아이콘
+
+        placeSection.innerText = place;
+        descSection.innerText = description;
+
+        const iconURL = `http://openweathermap.org/img/wn/${icon}@2x.png`;
+        iconSection.setAttribute('src', iconURL);
+      })
+      .catch((error) => {
+        alert(error);
+        console.error('Error fetching weather:', error);
+      });
+  };
+
+  // 날짜 불러오기
+  // 현재 날짜에서 월과 일만 가져오기
+  const currentDate = new Date();
+  const month = currentDate.getMonth() + 1; // 0부터 시작하므로 +1
+  const day = currentDate.getDate();
+
+  // 날짜 형식: MM월 DD일
+  const formattedDate = `${month}월 ${day}일`;
+
+  // 날짜 표시
+  const dateSection = document.querySelector('.date');
+  dateSection.innerText = formattedDate; // 예: 12월 14일
+</script>
+
+<style>
+  .clicked {
+    color: rgb(255, 0, 102);
+  }
+</style>
