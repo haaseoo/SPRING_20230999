@@ -228,12 +228,29 @@
   - 2명 이상 로그인 가능하도록, 사용자마다 다른 이름 세션 생성
   - 로그아웃 시 현재 사용자의 세션과 쿠키만 삭제
     <p align="center"> <img width="600" alt="11ㅈㅈ" src="https://github.com/user-attachments/assets/dce27823-f705-4205-a1bd-321119b61e4f" /> </p>
+    
+    > [!NOTE]<br>
+    > 1. 기존 세션 무효화 : getSession(false) 메서드로 현재 유효한 세션을 반환, 세션이 존재하는 경우 invalidate() 메서드를 호출하여 세션을 무효화<br>
+    > 2. JSESSIONID 쿠키 삭제 : 웹에서 사용자 세션 식별하는 쿠키, 로그아웃 시 삭제해야 새 세션 시작 가능, null 값으로 설정, cookie.setMaxAge(0); 쿠키의 만료 시간을 0으로 설정 (즉시 삭제), cookie.setPath("/"); 전체 웹 애플리케이션 경로에 대해 만료를 적용
 
   - 동일 파일 업로드 시 다른 이름으로 업로드
     <p align="center"> <img width="600" alt="5w 추가1" src="https://github.com/user-attachments/assets/9e1ae9b9-d0d7-4103-bc35-4c20497177d7" /> </p>
     
+    > [!NOTE]<br>
+    > 1. 파일명 변환 : 사용자가 입력한 메일 주소를 파일명으로 사용, replaceAll() 을 이용해 특수문자는 언더 스코어로 대체<br>
+    > ex) example@domain.com -> example_domain_com.txt<br>
+    > 2. 파일 존재 여부 확인<br>
+    > 같은 이름의 파일 존재할 경우 덮어쓰지 않도록<br>
+    >  (1) Path filePath = uploadPath.resolve(sanitizedEmail + ".txt");로 파일 경로를 설정<br>
+    >  (2) while (Files.exists(filePath)) { ... } 구문을 사용하여 파일이 존재하는지 확인<br>
+    >  (3) 파일이 이미 존재하면 count 값을 1씩 증가시키며 파일명을 변경<br>
+   
   - 파일 업로드 에러 페이지
     <p align="center"> <img width="400" src="https://github.com/user-attachments/assets/b1a7fa94-ff9a-4f40-9482-346254b48ba0" /> </p>
+    
+    > [!NOTE]<br>
+    > 1. 입력 검증 : message 값이 null, 공백이면 업로드 진행 X, redirectAttributes.addFlashAttribute로 오류 메시지 전달 후 리다이렉트<br>
+    > 2. 업로드 폴더 존재 확인 : 업로드 폴더가 없을 시 Files.createDirectories를 사용해 해당 디렉토리 생성
 
 ## 개인 추가 구현
 
@@ -248,15 +265,34 @@
 2. 회원가입 시 비밀번호 보기 박스
    <p align="center"> <img width="700" alt="추가2" src="https://github.com/user-attachments/assets/5ed7a8d2-effd-4746-9149-1621ef37acc7" /> </p>
 
+   > [!NOTE]<br>
+   > id="showPassword" 로 체크 박스 식별 후, 체크박스 클릭 시 togglePassword()라는 자바스크립트 함수가 호출<br>
+   > if (checkbox.checked) { passwordField.type = 'text'; } else { passwordField.type = 'password'; } : 체크박스가 체크되면 비밀번호 필드의 type 속성을 'text'로 변경하여 비밀번호가 텍스트로 보이도록, 체크박스가 해제되면 type 속성을 'password'로 다시 변경해 비밀번호를 숨김
+
+   
 <br><hr><br>
 
 3. 버튼 누르면 날짜, 현재 위치, 날씨 등장
    <p align="center"> <img width="700" alt="추가3" src="https://github.com/user-attachments/assets/b0aea278-9939-4e14-a96a-7047bd71d57f" /> </p>
    <p align="center"> <img width="700" alt="3" src="https://github.com/user-attachments/assets/9349f2e5-899b-46ed-bc3d-d26a18d14cbf" /> </p>
+   
+   > [!NOTE]<br>
+   > OpenWeather의 api 키를 연결해 구현 <br>
+   > 1. 날짜 표시 : newDate()를 통해 현재 날씨를 가져오고, gerMonth() & getDate()로 월과 일 추출, 추출된 날짜 정보를 formattedDate 형식으로 날짜 표시 영역에 표시 <br>
+   > 2. 오늘의 날씨 보기 버튼 : 클릭 시, 현재 위치의 날씨 정보를 불러옴 - 버튼을 클릭하면 navigator.geolocation.getCurrentPosition 함수가 실행되어 사용자의 위치 정보 받아옴<br>
+   > 3. 위치 및 날씨 정보<br>
+   >   (1) 위치 정보 : 현재 위치가 latitude와 longitude 값으로 success 함수에 전달, getWeather(latitude, longitude) 함수로 날씨 정보를 요청<br>
+   >   (2) 날씨 정보 : getWeather(lat, lon) 함수에서 OpenWeatherMap API를 통해 날씨 정보 받기<br>
+   > 4. 날씨 아이콘 : OpenWeatherMap에서 제공하는 URL을 사용하여 표시<br>
+   >= 콘솔에서 확인 가능
 
 <br><hr><br>
 
 4. 들어갔던 게시판 제목 색상 변화 & 글쓰기 버튼 오른쪽 정렬
    <p align="center"> <img width="700" alt="추가4" src="https://github.com/user-attachments/assets/82af7220-428c-493c-bb11-614a975ada43" /> </p>
    <p align="center"> <img width="700" alt="추ᅡ4" src="https://github.com/user-attachments/assets/9ac2b0fe-88f4-4a1c-91fb-4a1c1cf4d77c" /> </p>
-   
+
+   > [!NOTE]<br>
+   > 클릭된 제목에 대해 색상 변경, 그 상태를 로컬 스토리지에 저장해 새로 고침시에도 유지<br>
+   > changeColor() : 제목 요소가 clkcked 를 갖냐 마냐에 따라 해당 제목 저장/삭제, localStorage.setItem으로 로컬 스토리지에 저장해 새로 고침 시에도 유지 <br>
+   > DOMContentLoaded : 페이지가 완전히 로드된 후 clicked 클래스를 추가하여 색상이 유지되도록 <br>
